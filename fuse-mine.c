@@ -94,7 +94,8 @@ struct memfs_file *find_file(struct memfs_file *root, const char * path){
 	struct memfs_file *cur_child;
 	for(int i = 0; i < root->extra.dir.children_length; i++){
 		cur_child = *(root->extra.dir.children + i);
-		if(strncmp(path, cur_child->name, path_chunk_len) == 0){
+		if(strncmp(path, cur_child->name, path_chunk_len) == 0 &&
+			 strlen(cur_child->name) == path_chunk_len){
 			if(path_is_in_subdir){
 				if(cur_child->type == MEMFS_TYPE_DIR){
 					return find_file(cur_child, path_chunk_end + 1);
@@ -467,7 +468,8 @@ int memfs_read(const char *file, char * buf, size_t max_size, off_t offset, stru
 		if(found->type != MEMFS_TYPE_FILE) return -EINVAL;
 		memset(buf, 0, max_size);
 		int read_size = ((offset + max_size) > found->stat.st_size) ? (found->stat.st_size - offset) : max_size;
-		memcpy(buf, found->extra.file.contents, read_size);
+		if(read_size < 0) read_size = 0;
+		memcpy(buf, found->extra.file.contents + offset, read_size);
 		return read_size;
 	}else{
 		return -ENOENT;
