@@ -1,0 +1,4 @@
+TODO:
+  persist FS to file
+  load FS from file
+	load/persist encrypted files
